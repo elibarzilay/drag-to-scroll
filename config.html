@@ -9,19 +9,22 @@
     td { width: 50%; vertical-align: top; }
     td:first-child { text-align: right; font-size: 125%; font-weight: bolder; }
     td:nth-child(2) { padding-top: 0.5ex; }
-    input[type=checkbox] { display: none; }
+    input[type=checkbox] { width: 0; height: 0; margin: 0; padding: 0; }
     label { white-space: nowrap; font-weight: bolder; margin-right: 1em;
-            color: #755; transition: color 0.1s, text-shadow 0.5s; }
-    label.dependent { display: block; font-size: 80%; padding-top: 1ex; }
-    input:checked + label { color: #6fa;
-                            text-shadow: 0 0 10px #4f8, 0 0 30px #4f8; }
+            color: #755; transition: color 0.2s, text-shadow 0.5s; }
+    label.dependent {
+      display: block; font-size: 80%; padding-top: 1ex; width: fit-content; }
+    input:checked + label {
+      color: #6fa; text-shadow: 0 0 10px #4f8, 0 0 30px #4f8; }
     h1 { margin: 0; font-size: 125%; }
     hr { height: 5px; background-color: #666; border: none; margin: 4ex; }
-    a { color: #cc8; font-weight: bold; text-decoration: none;
-        transition: all 0.4s; }
-    a:active, a:hover { color: ee9; background-color: #444; }
-    .tip { color: #aaa; font-style: italic; font-size: 80%;
+    a { color: #ddb; font-weight: bold; text-decoration: none; }
+    .tip { color: #aa8; font-style: italic; font-size: 80%;
            margin: 0.5ex 0 0 1em; }
+    a:focus, a:hover, input[type=range]:focus, input[type=range]:hover,
+    input:focus + label, input:hover + label {
+      box-shadow: 0 0 3px 2px #322, inset 0 0 1px 1px #322;
+      transition: box-shadow 0.2s; outline: none; }
   </style>
   <script src="main.js" type="text/javascript"></script>
   <script src="config.js" type="text/javascript"></script>
@@ -45,8 +48,16 @@
     <div class="tip">(You can use disabled keys to prevent scrolling.)</div>
   </td>
 </tr><tr>
+  <td>Mouse Sensitivity</td><td style="text-align: left;">
+    <input id="sensitivity" type="range" value="3" min="0" max="12" step="1"
+           list="sensitivities" style="width: 100%;" />
+    <datalist id="sensitivities">
+      <option value="1"><option>3</option><option>6</option><option>10</option>
+    </datalist>
+  </td>
+</tr><tr>
   <td>Max Gliding Speed</td><td style="text-align: left;">
-    <input id="speed" type="range" value="20000" min="0" max="40000"
+    <input id="speed" type="range" value="20000" min="0" max="40000" step="200"
            list="speeds" style="width: 100%;" />
     <datalist id="speeds">
       <option>10000</option><option>20000</option><option>30000</option>
@@ -54,7 +65,7 @@
   </td>
 </tr><tr>
   <td>Glide Friction</td><td style="text-align: left;">
-    <input id="friction" type="range" value="5" min="0" max="12" step="0.01"
+    <input id="friction" type="range" value="5" min="0" max="12" step="0.1"
            list="frictions" style="width: 100%;" />
     <datalist id="frictions">
       <option>1</option><option>3</option><option>5</option>
