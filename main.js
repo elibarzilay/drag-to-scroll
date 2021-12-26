@@ -30,6 +30,26 @@ chrome.storage.onChanged.addListener((changes, _) =>
   changes.options && setOptions(changes.options.newValue));
 chrome.storage.sync.get("options", val => val && setOptions(val.options));
 
+// ===== Events ===============================================================
+
+const undoDragToScroll = [() => debug("removing event handlers")];
+const runUndoThunks = () => undoDragToScroll.forEach(thunk => thunk());
+const addEventListener = (type, handler, useCapture = true) => {
+  undoDragToScroll.push(() =>
+    document.removeEventListener(type, handler, useCapture));
+  document.addEventListener(type, handler, useCapture);
+}
+
+// When using "reload" for the extension, the existing instances stick around
+// and new ones get generated, which can end up with a pile of handlers etc.
+// Not a big problem (can't reload a non-unpacked extension), but there are
+// probably other cases that can lead to that.  So use a random number and a
+// custom event to get other instances to remove their handlers.  (The actual
+// extensions do stick around, visible in devtools.)
+{ let myId = Math.random();
+  addEventListener("D2SLoadId", e => (e.detail != myId) && runUndoThunks());
+  document.dispatchEvent(new CustomEvent("D2SLoadId", {detail: myId})); }
+
 // ===== Utilities ============================================================
 
 // Debugging
@@ -103,7 +123,8 @@ const isOverScrollbar = ev => {
 // and the CSS overflow set to scroll or auto?
 const isScrollable = elt => {
   const dv = document.defaultView;
-  const o = css => ["auto", "scroll"].includes(dv.getComputedStyle(elt)[css]);
+  const o = css => ["auto", "scroll", "overlay"]
+    .includes(dv.getComputedStyle(elt)[css]);
   return (elt.scrollWidth  > elt.clientWidth  && o("overflow-x"))
       || (elt.scrollHeight > elt.clientHeight && o("overflow-y"));
 }
@@ -329,7 +350,7 @@ const onMouseDown = ev => {
     return onMouseDown(ev);
   }
 }
-addEventListener("mousedown", onMouseDown, true);
+addEventListener("mousedown", onMouseDown);
 
 const onMouseMove = ev => {
   switch (activity) {
@@ -354,7 +375,7 @@ const onMouseMove = ev => {
   //
   }
 }
-addEventListener("mousemove", onMouseMove, true);
+addEventListener("mousemove", onMouseMove);
 
 const onMouseUp = ev => {
   switch (activity) {
@@ -377,12 +398,12 @@ const onMouseUp = ev => {
   //
   }
 }
-addEventListener("mouseup", onMouseUp, true);
+addEventListener("mouseup", onMouseUp);
 
 const onMouseOut = ev => {
   if (activity === DRAG && ev.toElement == null) stopDrag(ev);
 }
-addEventListener("mouseout", onMouseOut, true);
+addEventListener("mouseout", onMouseOut);
 
 const onContextMenu = ev => {
   if (!blockContextMenu) return;
@@ -390,4 +411,4 @@ const onContextMenu = ev => {
   debug("blocking context menu");
   blockEvent(ev);
 }
-addEventListener("contextmenu", onContextMenu, true);
+addEventListener("contextmenu", onContextMenu);
