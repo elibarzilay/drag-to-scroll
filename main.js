@@ -257,8 +257,8 @@ const Scroll = (()=>{
     let [dx, dy] = pos;
     for (let i = 0; i < elts.length; i++) {
       const elt = elts[i], orig = origins[i];
-      elt.scrollLeft = orig[0] - dx;
-      elt.scrollTop  = orig[1] - dy;
+      elt.scrollTo({ top: orig[1] - dy, left: orig[0] - dx,
+                     behavior: "instant" });
       dx -= orig[0] - elt.scrollLeft;
       dy -= orig[1] - elt.scrollTop;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return [0, 0];
