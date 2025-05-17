@@ -272,9 +272,11 @@ const Scroll = (()=>{
 let activity = STOP, blockContextMenu = false, mouseOrigin = null;
 
 const Glide = (()=>{
+  let href = null;
   //
   const update = () => {
     if (activity != GLIDE) return;
+    if (window.location.href !== href) return stop();
     debug("glide update");
     if (Motion.glide(performance.now()) &&
         Scroll.move(vsub(Motion.getPosition(), mouseOrigin)))
@@ -284,6 +286,7 @@ const Glide = (()=>{
   //
   const start = () => {
     if (Motion.start()) {
+      href = window.location.href;
       setTimeout(update, TIME_STEP);
       activity = GLIDE;
     } else {
