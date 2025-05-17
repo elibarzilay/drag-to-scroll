@@ -72,4 +72,8 @@ const loadAndStart = ev => {
 
 document.addEventListener("DOMContentLoaded", loadAndStart, true);
 
-document.addEventListener("beforeunload", save, true);
+document.addEventListener("beforeunload", e => {
+  save();
+  e.preventDefault();
+  e.returnValue = "";
+}, true);

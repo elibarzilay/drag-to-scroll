@@ -16,6 +16,9 @@
       display: block; font-size: 80%; padding-top: 1ex; width: fit-content; }
     input:checked + label {
       color: #6fa; text-shadow: 0 0 10px #4f8, 0 0 30px #4f8; }
+    textarea {
+      width: 100%; background: #333; color: #eee; border: 1px solid #777;
+    }
     h1 { margin: 0; font-size: 125%; }
     hr { height: 5px; background-color: #666; border: none; margin: 4ex; }
     a { color: #ddb; font-weight: bold; text-decoration: none; }
@@ -74,8 +77,12 @@
   </td>
 </tr><tr>
   <td>Disabled on URLs</td><td style="text-align: left;">
-    <textarea id="disabledUrlPatterns" rows="4" style="width: 100%; background: #333; color: #ccc; border: 1px solid #666;" placeholder="Enter URL patterns, one per line. Use * as a wildcard."></textarea>
-    <div class="tip">(Enter URL patterns to disable scrolling. Use * as a wildcard, e.g. *.google.com/* or https://*.example.com/path/*)</div>
+    <textarea id="disabledUrlPatterns" rows="4"
+              placeholder="https://foo.com/some/path&#10;https://*.pdf"
+    ></textarea>
+    <div class="tip">
+      (URL prefix patterns to disable; one per line; * is a wildcard.)
+    </div>
   </td>
 </tr><tr>
   <td>Debugging</td><td style="text-align: left;">

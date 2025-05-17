@@ -1,7 +1,7 @@
 {
   "name": "Drag to Scroll",
   "short_name": "Drag2Scroll",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Drag the mouse to scroll the page.",
   "icons": {"128": "icon.png"},
   "content_scripts": [{
@@ -9,10 +9,14 @@
     "js": ["main.js"],
     "run_at": "document_start",
     "all_frames": true}],
-  "background": { "scripts": ["background.js"] },
-  "web_accessible_resources": ["cursor.png"],
-  "permissions": ["<all_urls>", "storage", "tabs"],
+  "background": { "service_worker": "background.js" },
+  "web_accessible_resources": [{
+    "resources": ["cursor.png"],
+    "matches": ["<all_urls>"]
+  }],
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "options_page": "config.html",
-  "manifest_version": 2,
-  "minimum_chrome_version": "60"
+  "manifest_version": 3,
+  "minimum_chrome_version": "120"
 }
