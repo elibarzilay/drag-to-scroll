@@ -7,7 +7,8 @@ const options = { // defaults
   shiftKey: false, ctrlKey: false, altKey: false, metaKey: false,
   sensitivity: 9, speed: 20000, friction: 5,
   notext: false,
-  debug: false
+  debug: false,
+  disabledUrlPatterns: [],
 };
 const cOptions = {};
 const addComputedOptions = () =>
@@ -18,7 +19,9 @@ const addComputedOptions = () =>
 addComputedOptions();
 const KEYS = Object.keys(options).filter(x => x.endsWith("Key"));
 const BOOLEAN_OPTS =
-  Object.keys(options).filter(x => (typeof options[x]) === "boolean");
+  Object.keys(options).filter(x => typeof options[x] === "boolean");
+const TEXT_OPTS =
+  Object.keys(options).filter(x => Array.isArray(options[x]));
 
 const setOptions = o => {
   Object.assign(options, o);
@@ -26,7 +29,7 @@ const setOptions = o => {
   debug("Options:", options);
   debug("Computed Options:", cOptions);
 }
-chrome.storage.onChanged.addListener((changes, _) =>
+chrome.storage.onChanged.addListener(changes =>
   changes.options && setOptions(changes.options.newValue));
 chrome.storage.sync.get("options", val => val && setOptions(val.options));
 
@@ -58,6 +61,16 @@ const debug = (str, ...args) => {
   console.debug(`D2S: ${str}`, ...(args.map(x =>
     (typeof x === "function" && x.length == 0) ? x() : x)));
 }
+
+const rxQuote = s => s.replace(/[.*+?^${}()|\[\]\\]/g, "\\$&");
+
+const patternToRegexp = pattern =>
+  RegExp("^" + rxQuote(pattern).replace(/\\\*/g, ".*"));
+
+// Check if current URL matches any disabled patterns
+const isDisabled = () =>
+  options.disabledUrlPatterns.some(pattern =>
+    patternToRegexp(pattern).test(window.location.href));
 
 // Vector math
 const vadd  = (a,b) => [a[0]+b[0], a[1]+b[1]];
@@ -154,7 +167,7 @@ const CoverDiv = (() => {
     elt = document.createElement("div");
     Object.assign(elt.style, {
       background: "transparent none",
-      cursor: "url('"+chrome.extension.getURL("cursor.png")+"') 16 16, auto",
+      cursor: "url('"+chrome.runtime.getURL("cursor.png")+"') 16 16, auto",
       position: "fixed", display: "block", zIndex: 99999999,
       top: 0, left: 0, bottom: 0, right: 0,
       // backgroundColor: "rgba(255,128,255,0.5)",
@@ -350,7 +363,6 @@ const onMouseDown = ev => {
     return onMouseDown(ev);
   }
 }
-addEventListener("mousedown", onMouseDown);
 
 const onMouseMove = ev => {
   switch (activity) {
@@ -375,7 +387,6 @@ const onMouseMove = ev => {
   //
   }
 }
-addEventListener("mousemove", onMouseMove);
 
 const onMouseUp = ev => {
   switch (activity) {
@@ -398,12 +409,10 @@ const onMouseUp = ev => {
   //
   }
 }
-addEventListener("mouseup", onMouseUp);
 
 const onMouseOut = ev => {
-  if (activity === DRAG && ev.toElement == null) stopDrag(ev);
+  if (activity === DRAG && ev.relatedTarget == null) stopDrag(ev);
 }
-addEventListener("mouseout", onMouseOut);
 
 const onContextMenu = ev => {
   if (!blockContextMenu) return;
@@ -411,4 +420,16 @@ const onContextMenu = ev => {
   debug("blocking context menu");
   blockEvent(ev);
 }
-addEventListener("contextmenu", onContextMenu);
+
+// ===== Start, unless disabled ===============================================
+
+if (isDisabled()) {
+  debug("disabled for this URL");
+} else {
+  // Add event listeners for mouse events
+  addEventListener("mousedown", onMouseDown);
+  addEventListener("mousemove", onMouseMove);
+  addEventListener("mouseup", onMouseUp);
+  addEventListener("mouseout", onMouseOut);
+  addEventListener("contextmenu", onContextMenu);
+}

@@ -9,17 +9,23 @@ const forallOptions = cb => {
   }
 };
 
-const isBoolOpt = (o) => BOOLEAN_OPTS.includes(o);
+const isBoolOpt = o => BOOLEAN_OPTS.includes(o);
+const isTextOpt = o => TEXT_OPTS.includes(o);
 
 const save = () => {
   forallOptions((k, inp) =>
-    options[k] = isBoolOpt(k) ? inp.checked : Number(inp.value));
+    options[k] =
+      isBoolOpt(k) ? inp.checked
+      : isTextOpt(k) ? inp.value.split(/\n+/).map(s => s.trim()).filter(s => s)
+      : Number(inp.value));
   chrome.storage.sync.set({options});
 };
 
 const load = () => {
   forallOptions((k, inp) => {
-    if (isBoolOpt(k)) inp.checked = options[k]; else inp.value = options[k];
+    if (isBoolOpt(k))      inp.checked = options[k];
+    else if (isTextOpt(k)) inp.value = options[k].join("\n");
+    else                   inp.value = options[k];
   });
 };
 
@@ -66,4 +72,4 @@ const loadAndStart = ev => {
 
 document.addEventListener("DOMContentLoaded", loadAndStart, true);
 
-document.addEventListener("unload", save, true);
+document.addEventListener("beforeunload", save, true);
