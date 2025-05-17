@@ -271,46 +271,60 @@ const Scroll = (()=>{
 
 let activity = STOP, blockContextMenu = false, mouseOrigin = null;
 
-const updateGlide = () => {
-  if (activity != GLIDE) return;
-  debug("glide update");
-  if (Motion.glide(performance.now()) &&
-      Scroll.move(vsub(Motion.getPosition(), mouseOrigin)))
-    setTimeout(updateGlide, TIME_STEP);
-  else stopGlide();
-};
-
-const stopGlide = () => {
-  debug("glide stop");
-  activity = STOP;
-  Motion.stop();
-};
-
-const updateDrag = ev => {
-  debug("drag update");
-  const pos = evPos(ev);
-  mouseOrigin = vadd(mouseOrigin, Scroll.move(vsub(pos, mouseOrigin)));
-  Motion.impulse(pos, ev.timeStamp);
-};
-
-const startDrag = ev => {
-  debug("drag start");
-  activity = DRAG;
-  Scroll.start(ev);
-  updateDrag(ev);
-};
-
-const stopDrag = ev => {
-  debug("drag stop");
-  CoverDiv.hide();
-  updateDrag(ev);
-  if (Motion.start()) {
-    setTimeout(updateGlide, TIME_STEP);
-    activity = GLIDE;
-  } else {
+const Glide = (()=>{
+  //
+  const update = () => {
+    if (activity != GLIDE) return;
+    debug("glide update");
+    if (Motion.glide(performance.now()) &&
+        Scroll.move(vsub(Motion.getPosition(), mouseOrigin)))
+      setTimeout(update, TIME_STEP);
+    else stop();
+  };
+  //
+  const start = () => {
+    if (Motion.start()) {
+      setTimeout(update, TIME_STEP);
+      activity = GLIDE;
+    } else {
+      activity = STOP;
+    }
+  };
+  //
+  const stop = () => {
+    debug("glide stop");
     activity = STOP;
-  }
-};
+    Motion.stop();
+  };
+  //
+  return { update, start, stop };
+})();
+
+const Drag = (()=>{
+  //
+  const update = ev => {
+    debug("drag update");
+    const pos = evPos(ev);
+    mouseOrigin = vadd(mouseOrigin, Scroll.move(vsub(pos, mouseOrigin)));
+    Motion.impulse(pos, ev.timeStamp);
+  };
+  //
+  const start = ev => {
+    debug("drag start");
+    activity = DRAG;
+    Scroll.start(ev);
+    update(ev);
+  };
+  //
+  const stop = ev => {
+    debug("drag stop");
+    CoverDiv.hide();
+    update(ev);
+    Glide.start();
+  };
+  //
+  return { update, start, stop };
+})();
 
 // ===== Event handlers =======================================================
 
@@ -319,7 +333,7 @@ const onMouseDown = ev => {
   switch (activity) {
   //
   case GLIDE:
-    stopGlide();
+    Glide.stop();
   // fall through
   //
   case STOP:
@@ -350,7 +364,7 @@ const onMouseDown = ev => {
   //
   case DRAG:
     Motion.stop();
-    stopDrag(ev);
+    Drag.stop(ev);
     break;
   //
   default:
@@ -368,7 +382,7 @@ const onMouseMove = ev => {
   //
   case DRAG:
     if (ev.buttons != cOptions.buttons) break;
-    updateDrag(ev);
+    Drag.update(ev);
     blockEvent(ev);
     break;
   //
@@ -377,7 +391,7 @@ const onMouseMove = ev => {
     if (vmag2(vsub(mouseOrigin, evPos(ev))) > cOptions.sensitivity2) {
       if (options.button == 2) blockContextMenu = true;
       CoverDiv.show();
-      startDrag(ev);
+      Drag.start(ev);
     }
     blockEvent(ev);
     break;
@@ -401,14 +415,14 @@ const onMouseUp = ev => {
     break;
   //
   case DRAG:
-    if (ev.buttons != cOptions.buttons) { stopDrag(ev); blockEvent(ev); }
+    if (ev.buttons != cOptions.buttons) { Drag.stop(ev); blockEvent(ev); }
     break;
   //
   }
 };
 
 const onMouseOut = ev => {
-  if (activity === DRAG && ev.relatedTarget == null) stopDrag(ev);
+  if (activity === DRAG && ev.relatedTarget == null) Drag.stop(ev);
 };
 
 const onContextMenu = ev => {
