@@ -5,18 +5,18 @@
 const options = { // defaults
   lButton: false, mButton: false, rButton: true,
   shiftKey: false, ctrlKey: false, altKey: false, metaKey: false,
-  sensitivity: 9, speed: 20000, friction: 5,
+  sensitivity: 9, speed: 28000, friction: 5,
   notext: false,
   debug: false,
   disabledUrlPatterns: [],
 };
 const cOptions = {};
-const addComputedOptions = () =>
+const setComputedOptions = () =>
   Object.assign(cOptions, { buttons: (options.lButton ? 1 : 0) +
                                      (options.rButton ? 2 : 0) +
                                      (options.mButton ? 4 : 0),
                             sensitivity2: Math.pow(options.sensitivity, 2) });
-addComputedOptions();
+setComputedOptions();
 const KEYS = Object.keys(options).filter(x => x.endsWith("Key"));
 const BOOLEAN_OPTS =
   Object.keys(options).filter(x => typeof options[x] === "boolean");
@@ -25,7 +25,7 @@ const TEXT_OPTS =
 
 const setOptions = o => {
   Object.assign(options, o);
-  addComputedOptions();
+  setComputedOptions();
   debug("Options:", options);
   debug("Computed Options:", cOptions);
 };

@@ -12,28 +12,42 @@ const forallOptions = cb => {
 const isBoolOpt = o => BOOLEAN_OPTS.includes(o);
 const isTextOpt = o => TEXT_OPTS.includes(o);
 
+const optionXform = (()=>{
+  // each one is [saveFn, loadFn]
+  return {
+    sensitivity: [
+      x => +getElt("sensitivity").max - x,
+      x => +getElt("sensitivity").max - x],
+    speed: [x => x*1000, x => x/1000],
+    disabledUrlPatterns: [
+      x => x.split(/\n+/).map(s => s.trim()).filter(s => s),
+      x => x.join("\n")],
+  };
+})();
+
 const save = () => {
-  forallOptions((k, inp) =>
-    options[k] =
+  forallOptions((k, inp) => {
+    const x =
       isBoolOpt(k) ? inp.checked
-      : isTextOpt(k) ? inp.value.split(/\n+/).map(s => s.trim()).filter(s => s)
-      : Number(inp.value));
+      : isTextOpt(k) ? inp.value
+      : Number(inp.value);
+    options[k] = k in optionXform ? optionXform[k][0](x) : x;
+  });
+  debug("Saving:", options);
   chrome.storage.sync.set({options});
 };
 
 const load = () => {
   forallOptions((k, inp) => {
-    if (isBoolOpt(k))      inp.checked = options[k];
-    else if (isTextOpt(k)) inp.value = options[k].join("\n");
-    else                   inp.value = options[k];
+    const x = k in optionXform ? optionXform[k][1](options[k]) : options[k];
+    if (isBoolOpt(k)) inp.checked = x;
+    else              inp.value = x;
   });
 };
 
-let updateTimeoutId = null;
-
 const onUpdate = ev => {
-  if (updateTimeoutId != null) clearTimeout(updateTimeoutId);
-  updateTimeoutId = setTimeout(save, 200);
+  clearTimeout(onUpdate.timer);
+  onUpdate.timer = setTimeout(save, 200);
 };
 
 const toggleBoolean = ev => {
@@ -49,18 +63,31 @@ const start = () => {
   const platform = (s) => navigator.platform.startsWith(s);
   getElt("metaKey").nextSibling.innerHTML =
     platform("Win") ? "&#x229E;" : platform("Mac") ? "&#x2318;" : "Meta";
-  const text = ["<i>Here's a bunch of text to scroll:</i>", ""];
-  let beers = 99;
+  getElt("long-footer").innerHTML = beers().join("<br><br>");
+  getElt("nested-footer").innerHTML = graycode(3).join("<br>");
+};
+
+const beers = () => {
+  let text = [], beers = 99;
   const bottles = (n, rest) =>
-    `${n==0 ? "no more" : n} bottle${n==1?"":"s"} of beer${rest}`;
-  while (beers > 0) {
-    text.push(bottles(beers, " on the wall,"),
-              bottles(beers, "!"),
-              "Take one down, pass it around",
-              bottles(--beers, " on the wall."),
-              "");
-  }
-  getElt("long_footer").innerHTML = text.join("<br>");
+    `${n==0 ? "No more" : n} bottle${n==1?"":"s"} of beer${rest}`;
+  const bottle = beers => [
+    bottles(beers, " on the wall,"),
+    bottles(beers, "!"),
+    "Take one down, pass it around",
+    bottles(beers-1, " on the wall."),
+  ];
+  while (beers > 0) text.push(bottle(beers--).join("<br>"));
+  text[10] = "<details><summary>...</summary>" + text.splice(10, 80, []).join("<br><br>") + "</details>";
+  return text;
+};
+
+const graycode = bits => {
+  const gray = n => n ^ (n >> 1);
+  const str = n =>
+    n.toString(2).padStart(bits, "0").replace(/./g, b =>
+      `<div class='bit${b}'></div>`);
+  return Array.from({length: 1 << bits}, (_, i) => str(gray(i)));
 };
 
 const loadAndStart = ev => {
