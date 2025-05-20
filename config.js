@@ -60,9 +60,11 @@ const start = () => {
   forallOptions((k, inp) => {
     inp.addEventListener("change", onUpdate, false);
     if (isBoolOpt(k)) inp.addEventListener("keyup", toggleBoolean, true); });
-  const platform = (s) => navigator.platform.startsWith(s);
+  const platform = s => navigator.userAgent.toLowerCase().includes(s);
   getElt("metaKey").nextSibling.innerHTML =
-    platform("Win") ? "&#x229E;" : platform("Mac") ? "&#x2318;" : "Meta";
+    platform("windows") ? "&#x229E;"
+    : platform("macintosh") ? "&#x2318;"
+    : "Super";
   getElt("long-footer").innerHTML = beers().join("<br><br>");
   getElt("nested-footer").innerHTML = graycode(3).join("<br>");
 };
@@ -102,5 +104,4 @@ document.addEventListener("DOMContentLoaded", loadAndStart, true);
 document.addEventListener("beforeunload", e => {
   save();
   e.preventDefault();
-  e.returnValue = "";
 }, true);

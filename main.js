@@ -36,17 +36,17 @@ chrome.storage.onChanged.addListener(changes =>
 const debug = (str, ...args) => {
   if (!options.debug) return;
   console.debug(`D2S: ${str}`, ...(args.map(x =>
-    (typeof x === "function" && x.length == 0) ? x() : x)));
+    (typeof x === "function" && x.length === 0) ? x() : x)));
 };
 
 // ===== Events ===============================================================
 
 const undoDragToScroll = [() => debug("removing event handlers")];
 const runUndoThunks = () => undoDragToScroll.forEach(thunk => thunk());
-const addEventListener = (type, handler, useCapture = true) => {
+const addEventListener = (type, handler, capture = true) => {
   undoDragToScroll.push(() =>
-    document.removeEventListener(type, handler, useCapture));
-  document.addEventListener(type, handler, useCapture);
+    document.removeEventListener(type, handler, { capture }));
+  document.addEventListener(type, handler, { capture });
 };
 
 // When using "reload" for the extension, the existing instances stick around
@@ -56,7 +56,7 @@ const addEventListener = (type, handler, useCapture = true) => {
 // custom event to get other instances to remove their handlers.  (The actual
 // extensions do stick around, visible in devtools.)
 { let myId = Math.random();
-  addEventListener("D2SLoadId", e => (e.detail != myId) && runUndoThunks());
+  addEventListener("D2SLoadId", e => (e.detail !== myId) && runUndoThunks());
   document.dispatchEvent(new CustomEvent("D2SLoadId", {detail: myId})); }
 
 // ===== Utilities ============================================================
@@ -95,7 +95,7 @@ const isOverText = ev => {
   for (let i = 0; i < parent.childNodes.length; i++) {
     const child = parent.childNodes[i];
     if (child.nodeType !== Node.TEXT_NODE) continue;
-    if (child.textContent.search(/\S/) == -1) continue;
+    if (child.textContent.search(/\S/) < 0) continue;
     try {
       testElt.appendChild(parent.replaceChild(testElt, child));
       if (testElt.isSameNode(
@@ -145,16 +145,16 @@ const isScrollable = elt => {
 const findScrollables = elt => {
   const elts = [], seen = new Set();
   while (true) {
-    if (elt == document.documentElement) elt = document.scrollingElement;
+    if (elt === document.documentElement) elt = document.scrollingElement;
     if (elt == null || seen.has(elt)) break; else seen.add(elt);
-    if (elt == document.scrollingElement) { elts.push(elt); break; }
+    if (elt === document.scrollingElement) { elts.push(elt); break; }
     if (isScrollable(elt)) elts.push(elt);
     elt = elt.parentNode;
   }
   return elts;
 };
 
-const TIME_STEP = 10, STOP = 0, CLICK = 1, DRAG = 2, GLIDE = 3;
+const STOP = 0, CLICK = 1, DRAG = 2, GLIDE = 3;
 
 // ===== CoverDiv =============================================================
 // Use this to change the cursor mostly, possibly also avoid events
@@ -174,11 +174,10 @@ const CoverDiv = (()=>{
   };
   const show = () => {
     if (elt === null) createCoverDiv();
-    document.body.appendChild(elt);
+    document.body.append(elt);
   };
   const hide = () => {
-    if (elt !== null && elt.parentNode !== null)
-      elt.parentNode.removeChild(elt);
+    if (elt !== null && elt.parentNode !== null) elt.remove();
   };
   return ({ show, hide });
 })();
@@ -201,7 +200,7 @@ const Motion = (()=>{
     return true;
   };
   const start = () => {
-    if (impulses.new == impulses.old) { velocity = [0, 0]; return false; }
+    if (impulses.new === impulses.old) { velocity = [0, 0]; return false; }
     position   = impulses.new.pos;
     updateTime = impulses.new.time;
     velocity = vdiv(vsub(impulses.new.pos,impulses.old.pos),
@@ -275,19 +274,19 @@ const Glide = (()=>{
   let href = null;
   //
   const update = () => {
-    if (activity != GLIDE) return;
+    if (activity !== GLIDE) return;
     if (window.location.href !== href) return stop();
     debug("glide update");
     if (Motion.glide(performance.now()) &&
         Scroll.move(vsub(Motion.getPosition(), mouseOrigin)))
-      setTimeout(update, TIME_STEP);
+      requestAnimationFrame(update);
     else stop();
   };
   //
   const start = () => {
     if (Motion.start()) {
       href = window.location.href;
-      setTimeout(update, TIME_STEP);
+      requestAnimationFrame(update);
       activity = GLIDE;
     } else {
       activity = STOP;
