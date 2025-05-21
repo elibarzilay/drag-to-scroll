@@ -28,7 +28,7 @@ const optionXform = (()=>{
 const save = () => {
   forallOptions((k, inp) => {
     const x =
-      isBoolOpt(k) ? inp.checked
+      isBoolOpt(k) ? inp.classList.contains("on")
       : isTextOpt(k) ? inp.value
       : Number(inp.value);
     options[k] = k in optionXform ? optionXform[k][0](x) : x;
@@ -40,26 +40,32 @@ const save = () => {
 const load = () => {
   forallOptions((k, inp) => {
     const x = k in optionXform ? optionXform[k][1](options[k]) : options[k];
-    if (isBoolOpt(k)) inp.checked = x;
+    if (isBoolOpt(k)) inp.classList.toggle("on", x);
     else              inp.value = x;
   });
 };
 
-const onUpdate = ev => {
+const onUpdate = () => {
   clearTimeout(onUpdate.timer);
   onUpdate.timer = setTimeout(save, 200);
 };
 
-const toggleBoolean = ev => {
-  if (![" ", "Enter"].includes(ev.key)) return;
-  ev.target.click();
-  blockEvent(ev);
-};
-
 const start = () => {
   forallOptions((k, inp) => {
-    inp.addEventListener("change", onUpdate, false);
-    if (isBoolOpt(k)) inp.addEventListener("keyup", toggleBoolean, true); });
+    switch (inp.tagName.toLowerCase()) {
+    case "button":
+      inp.addEventListener("click", ev => {
+        ev.target.classList.toggle("on");
+        onUpdate();
+      });
+      break;
+    case "input": case "textarea":
+      inp.addEventListener("change", onUpdate, false);
+      break;
+    default:
+      console.error("unexpected option tagName:", inp.tagName);
+    }
+  });
   const platform = s => navigator.userAgent.toLowerCase().includes(s);
   getElt("metaKey").nextSibling.innerHTML =
     platform("windows") ? "&#x229E;"

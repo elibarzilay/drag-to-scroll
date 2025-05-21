@@ -1,0 +1,62 @@
+body {
+  font-family: sans-serif; text-align: center; font-size: 100%;
+  background-color: black; color: #ccc;
+}
+
+table { width: 75%; margin: 0 auto; }
+td { width: 50%; vertical-align: baseline; }
+td:first-child { text-align: right; font-size: 125%; font-weight: bolder; }
+td:nth-child(2) { text-align: left; }
+
+input[type=range] { width: 100%; accent-color: #fff; color: #333; }
+button {
+  white-space: nowrap; font-weight: bolder; font-size: 100%;
+  border: none; color: #755; background-color: black;
+  margin-right: 0.5ex; padding: 1px 0.5ex;
+  &.on { color: #6fa; text-shadow: 0 0 10px #4f8, 0 0 30px #4f8; }
+  &:hover { color: #a66; }
+  &.on:hover { color: #8fb; }
+  &.dependent { font-size: 80%; }
+}
+button, input, a {
+  transition: all 0.2s;
+  border-radius: 3px; outline: 1px solid #4440;
+  &:focus { outline: 1px solid #444; }
+  &:hover { background-color: #222; }
+}
+textarea {
+  width: 100%; background: #333; color: #eee; border: 1px solid #777;
+  vertical-align: top;
+}
+
+h1 { margin: 0; font-size: 125%; }
+h4 { font-style: italic; }
+hr { height: 5px; background-color: #666; border: none; margin: 4ex; }
+a { color: #ddb; font-weight: bold; text-decoration: none; }
+
+.tip { color: #665; font-style: italic; font-size: 80%;
+       margin: 0 0 0.5ex 1em; }
+
+#long-footer { width: fit-content; margin: auto; }
+details {
+  width: 100%; display: inline-block;
+  & summary { background-color: #222; cursor: pointer; }
+  &[open] summary { margin-bottom: 1ex; }
+}
+#nested1, #nested2 {
+  display: inline-block; overflow: scroll; scrollbar-width: none;
+  margin: auto; border: 2px solid #666; text-align: center;
+}
+#nested1 {
+  width: fit-content; height: 20vh; padding: 2ex; background: #333;
+}
+#nested2 {
+  width: 12vw; height: 12vw; padding: 0; background: #444;
+}
+img { display: block; width: 20vw; height: 20vw; }
+.bit0, .bit1 {
+  width: 3em; height: 3em; display: inline-block; border-radius: 50%;
+  margin: 1ex;
+}
+.bit0 { background: radial-gradient(circle at 30% 30%, #f22, #422); }
+.bit1 { background: radial-gradient(circle at 30% 30%, #22f, #224); }

@@ -2,90 +2,39 @@
 <html>
 <head>
   <title>Drag to Scroll</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; font-size: 100%;
-           background-color: black; color: #ccc; }
-    table { width: 75%; margin: 0 auto; }
-    td { width: 50%; vertical-align: top; }
-    td:first-child { text-align: right; font-size: 125%; font-weight: bolder; }
-    td:nth-child(2) { padding-top: 0.5ex; }
-    input[type=checkbox] { width: 0; height: 0; margin: 0; padding: 0; }
-    input[type=range] { width: 100%; accent-color: #fff; color: #333; }
-    label { white-space: nowrap; font-weight: bolder; margin-right: 1em;
-            color: #755; transition: color 0.2s, text-shadow 0.5s; }
-    label.dependent {
-      display: block; font-size: 80%; padding-top: 1ex; width: fit-content; }
-    input:checked + label {
-      color: #6fa; text-shadow: 0 0 10px #4f8, 0 0 30px #4f8; }
-    textarea {
-      width: 100%; background: #333; color: #eee; border: 1px solid #777;
-    }
-    h1 { margin: 0; font-size: 125%; }
-    h4 { font-style: italic; }
-    hr { height: 5px; background-color: #666; border: none; margin: 4ex; }
-    a { color: #ddb; font-weight: bold; text-decoration: none; }
-    .tip { color: #665; font-style: italic; font-size: 80%;
-           margin: 0.5ex 0 0 1em; }
-    :is(a, input[type=range]):is(:focus, :hover),
-    input:is(:focus, :hover) + label {
-      box-shadow: 0 0 3px 2px #322, inset 0 0 1px 1px #322;
-      transition: box-shadow 0.2s; outline: none; }
-    #long-footer { width: fit-content; margin: auto; }
-    details {
-      width: 100%; display: inline-block;
-      & summary { background-color: #222; cursor: pointer; }
-      &[open] summary { margin-bottom: 1ex; }
-    }
-    #nested1, #nested2 {
-      display: inline-block; overflow: scroll; scrollbar-width: none;
-      margin: auto; border: 2px solid #666; text-align: center;
-    }
-    #nested1 {
-      width: fit-content; height: 20vh; padding: 2ex; background: #333;
-    }
-    #nested2 {
-      width: 12vw; height: 12vw; padding: 0; background: #444;
-    }
-    img { display: block; width: 20vw; height: 20vw; }
-    .bit0, .bit1 {
-      width: 3em; height: 3em; display: inline-block; border-radius: 50%;
-      margin: 1ex;
-    }
-    .bit0 { background: radial-gradient(circle at 30% 30%, #f22, #422); }
-    .bit1 { background: radial-gradient(circle at 30% 30%, #22f, #224); }
-  </style>
+  <link rel="stylesheet" type="text/css" href="config.css" />
   <script src="main.js" type="text/javascript"></script>
   <script src="config.js" type="text/javascript"></script>
 </head>
 <body>
 
 <table border="0" cellspacing="16"><tr>
-  <td>Mouse Button</td><td style="text-align: left;">
-    <input id="lButton" type="checkbox" /><label for="lButton">Left</label>
-    <input id="mButton" type="checkbox" /><label for="mButton">Middle</label>
-    <input id="rButton" type="checkbox" /><label for="rButton">Right</label>
-    <input id="notext" type="checkbox" />
-    <label for="notext" class="dependent">Don't drag when on text</label>
+  <td>Mouse Button</td><td>
+    <button id="lButton">Left</button>
+    <button id="mButton">Middle</button>
+    <button id="rButton">Right</button>
+    <div class="tip">(Shift-click to require select multiple buttons)</div>
+    <button id="notext" class="dependent">Don't drag when on text</button>
   </td>
 </tr><tr>
-  <td>Modifier Keys</td><td style="text-align: left;">
-    <input id="shiftKey" type="checkbox" /><label for="shiftKey">Shift</label>
-    <input id="ctrlKey"  type="checkbox" /><label for="ctrlKey">Ctrl</label>
-    <input id="altKey"   type="checkbox" /><label for="altKey">Alt</label>
-    <input id="metaKey"  type="checkbox" /><label for="metaKey">Meta</label>
-    <div class="tip">(You can use disabled keys to prevent scrolling.)</div>
+  <td>Modifier Keys</td><td>
+    <button id="shiftKey">Shift</button>
+    <button id="ctrlKey">Ctrl</button>
+    <button id="altKey">Alt</button>
+    <button id="metaKey">Meta</button>
+    <div class="tip">(Unselected keys will prevent scrolling)</div>
   </td>
 </tr><tr>
-  <td>Mouse Sensitivity</td><td style="text-align: left;">
+  <td>Mouse Sensitivity</td><td>
     <input id="sensitivity" type="range" value="5" min="0" max="12"
            list="sensitivities" />
     <datalist id="sensitivities">
       <option value="0"><option value="4"><option value="8"><option value="12">
     </datalist>
-    <div class="tip">(Movement distance for starting a scroll.)</div>
+    <div class="tip">(Movement distance for starting a scroll)</div>
   </td>
 </tr><tr>
-  <td>Max Gliding Speed</td><td style="text-align: left;">
+  <td>Max Gliding Speed</td><td>
     <input id="speed" type="range" value="20" min="0" max="40"
            list="speeds" />
     <datalist id="speeds">
@@ -93,7 +42,7 @@
     </datalist>
   </td>
 </tr><tr>
-  <td>Glide Friction</td><td style="text-align: left;">
+  <td>Glide Friction</td><td>
     <input id="friction" type="range" value="5" min="0" max="12" step="0.1"
            list="frictions" />
     <datalist id="frictions">
@@ -102,18 +51,18 @@
     </datalist>
   </td>
 </tr><tr>
-  <td>Disabled on URLs</td><td style="text-align: left;">
+  <td>Disabled on URLs</td><td>
     <textarea id="disabledUrlPatterns" rows="4"
               placeholder="https://foo.com/some/path&#10;https://*.pdf"
     ></textarea>
     <div class="tip">
-      (URL prefix patterns to disable; one per line; * is a wildcard.)
+      (URL prefix patterns to disable; one per line;
+      <code>*</code> is a wildcard)
     </div>
   </td>
 </tr><tr>
-  <td>Debugging</td><td style="text-align: left;">
-    <input id="debug" type="checkbox" />
-    <label for="debug">Dump log to console</label>
+  <td>Debugging</td><td>
+    <button id="debug">Dump log to console</button>
   </td>
 </tr></table>
 
