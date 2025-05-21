@@ -50,14 +50,27 @@ const onUpdate = () => {
   onUpdate.timer = setTimeout(save, 200);
 };
 
+const mkClickHandler = group => ({ target, shiftKey, ctrlKey }) => {
+  // toggle if not part of a group, if shift/ctrl held, or if a selection is
+  // not required and exactly this one is on...
+  if (!group || shiftKey || ctrlKey
+      || (!group.one && group.every(b =>
+                          b.classList.contains("on") === (target === b))))
+    target.classList.toggle("on");
+  else // ...otherwise select just this one
+    group.forEach(b => b.classList.toggle("on", target === b));
+  onUpdate();
+};
+
 const start = () => {
+  const groups = {}, reqOne = ["Button"];
   forallOptions((k, inp) => {
     switch (inp.tagName.toLowerCase()) {
     case "button":
-      inp.addEventListener("click", ev => {
-        ev.target.classList.toggle("on");
-        onUpdate();
-      });
+      const g = inp.id.match(/^.*([A-Z][a-z]*)$/)?.[1];
+      if (g)
+        (groups[g] ??= Object.assign([], { one: reqOne.includes(g) })).push(inp);
+      inp.addEventListener("click", mkClickHandler(groups[g]));
       break;
     case "input": case "textarea":
       inp.addEventListener("change", onUpdate, false);
