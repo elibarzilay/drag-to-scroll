@@ -314,6 +314,7 @@ const Drag = (()=>{
   const start = ev => {
     debug("drag start");
     activity = DRAG;
+    blockContextMenu = true;
     Scroll.start(ev);
     update(ev);
   };
@@ -331,7 +332,6 @@ const Drag = (()=>{
 // ===== Event handlers =======================================================
 
 const onMouseDown = ev => {
-  blockContextMenu = false;
   switch (activity) {
   //
   case GLIDE:
@@ -361,7 +361,6 @@ const onMouseDown = ev => {
     mouseOrigin = evPos(ev);
     Motion.impulse(mouseOrigin, ev.timeStamp);
     blockEvent(ev);
-    if (ev.button == 2) blockContextMenu = true;
     break;
   //
   case DRAG:
@@ -391,7 +390,6 @@ const onMouseMove = ev => {
   case CLICK:
     if (ev.buttons != cOptions.buttons) break;
     if (vmag2(vsub(mouseOrigin, evPos(ev))) > cOptions.sensitivity2) {
-      if (options.button == 2) blockContextMenu = true;
       CoverDiv.show();
       Drag.start(ev);
     }
@@ -410,7 +408,6 @@ const onMouseUp = ev => {
     debug("unclick, no drag: %o", ev.buttons);
     CoverDiv.hide();
     if (ev.button == 0) getSelection().removeAllRanges();
-    if (ev.button == 2) blockContextMenu = false;
     if (document.activeElement) document.activeElement.blur();
     if (ev.target) ev.target.focus();
     activity = STOP;
