@@ -1,7 +1,0 @@
-#!/bin/sh
-
-cd "$(dirname "$0")"
-name="$(basename "$PWD")"
-
-rm -f "../$name.zip"
-git archive --output="../$name.zip" --prefix="$name/" master
