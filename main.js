@@ -8,7 +8,7 @@ const options = { // defaults
   sensitivity: 9, speed: 28000, friction: 5,
   notext: false,
   debug: false,
-  disabledUrlPatterns: [],
+  disabledUrls: [],
 };
 const cOptions = {};
 const setComputedOptions = () =>
@@ -22,15 +22,6 @@ const BOOLEAN_OPTS =
   Object.keys(options).filter(x => typeof options[x] === "boolean");
 const TEXT_OPTS =
   Object.keys(options).filter(x => Array.isArray(options[x]));
-
-const setOptions = o => {
-  Object.assign(options, o);
-  setComputedOptions();
-  debug("Options:", options);
-  debug("Computed Options:", cOptions);
-};
-chrome.storage.onChanged.addListener(changes =>
-  changes.options && setOptions(changes.options.newValue));
 
 // Debugging
 const debug = (str, ...args) => {
@@ -68,7 +59,7 @@ const patternToRegexp = pattern =>
 
 // Check if current URL matches any disabled patterns
 const isDisabled = () =>
-  options.disabledUrlPatterns.some(pattern =>
+  options.disabledUrls.some(pattern =>
     patternToRegexp(pattern).test(window.location.href));
 
 // Vector math
@@ -433,7 +424,16 @@ const onContextMenu = ev => {
 
 // ===== Start, unless disabled ===============================================
 
-chrome.storage.sync.get("options", val => {
+const setOptions = o => {
+  Object.assign(options, o);
+  setComputedOptions();
+  debug("Options:", options);
+  debug("Computed Options:", cOptions);
+};
+
+chrome.storage?.onChanged.addListener(changes =>
+  changes.options && setOptions(changes.options.newValue));
+chrome.storage?.sync.get("options", val => {
   // need to ensure we have the current options
   if (!val?.options) return;
   setOptions(val.options);

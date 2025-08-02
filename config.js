@@ -19,7 +19,7 @@ const optionXform = (()=>{
       x => +getElt("sensitivity").max - x,
       x => +getElt("sensitivity").max - x],
     speed: [x => x*1000, x => x/1000],
-    disabledUrlPatterns: [
+    disabledUrls: [
       x => x.split(/\n+/).map(s => s.trim()).filter(s => s),
       x => x.join("\n")],
   };

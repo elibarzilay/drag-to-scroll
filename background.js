@@ -6,8 +6,10 @@ chrome.windows.getAll({populate: true}, wins => {
     return console.error("Failed to get windows:", chrome.runtime.lastError);
   wins.forEach(win =>
     win.tabs.forEach(tab =>
-      // Skip chrome://, edge://, and unloaded tabs
-      !/^(chrome|edge):\/\//.test(tab.url) && tab.status !== "unloaded"
+      // skip chrome://, edge://, and extensions
+      !/^(chrome|edge)(-extension)?:\/\//.test(tab.url)
+      // skip unloaded tabs
+      && tab.status !== "unloaded"
       && chrome.scripting.executeScript({
            target: { tabId: tab.id, allFrames: true },
            files: ["main.js"],
