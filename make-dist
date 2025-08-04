@@ -10,28 +10,37 @@ crx="dist/$name.crx"
 die() { echo "error: $*" 1>&2; exit 1; }
 
 # Check for uncommitted changes
-if [[ -n "$(git status --porcelain)" ]]; then
-  die "uncommitted changes"
+if [[ -n "$crx" && -n "$(git status --porcelain)" ]]; then
+  echo "uncommitted changes"
+  crx=""
 fi
 
-if [[ "$(git branch --show-current)" != "master" ]]; then
-  die "not on the \"master\" branch"
+if [[ -n "$crx" && "$(git branch --show-current)" != "master" ]]; then
+  echo "not on the \"master\" branch"
+  crx=""
 fi
 
 echo "Packing..."
-rm -rf dist; md -p dist
-git archive --format=tgz --prefix="$name/" master \
-  | tar xzf - -C dist
-
-cmd=("$exe")
-cmd+=(--pack-extension="$(wslpath -am "dist/$name")")
-cmd+=(--pack-extension-key="$(wslpath -am "keys/private.pem")")
-"${cmd[@]}"
-
-if [[ ! -e "$crx" ]]; then
-  die "Expected CRX file not generated at $crx"
+rm -rf dist; mkdir -p dist
+if [[ -n "$crx" ]]; then
+  git archive --format=tgz --prefix="$name/" master \
+  | tar -xzf - -C dist
+else
+  mkdir "dist/$name"
+  git ls-files -z | xargs -0 -I+ cp -a + --parents "dist/$name"
 fi
-echo "Done: $crx, opening folder"
+
+if [[ -z "$crx" ]]; then
+  echo "Skipping CRX generation, see above"
+else
+  cmd=("$exe")
+  cmd+=(--pack-extension="$(wslpath -am "dist/$name")")
+  cmd+=(--pack-extension-key="$(wslpath -am "keys/private.pem")")
+  "${cmd[@]}"
+  if [[ ! -e "$crx" ]]; then die "Expected CRX file not generated at $crx"; fi
+  echo "Done: $crx"
+fi
+
 echo "=> use the $name directory to load unpacked if needed"
 
-open -s "$crx"
+open dist

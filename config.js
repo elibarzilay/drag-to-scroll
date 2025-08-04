@@ -15,9 +15,6 @@ const isTextOpt = o => TEXT_OPTS.includes(o);
 const optionXform = (()=>{
   // each one is [saveFn, loadFn]
   return {
-    sensitivity: [
-      x => +getElt("sensitivity").max - x,
-      x => +getElt("sensitivity").max - x],
     speed: [x => x*1000, x => x/1000],
     disabledUrls: [
       x => x.split(/\n+/).map(s => s.trim()).filter(s => s),

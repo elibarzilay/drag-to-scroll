@@ -5,7 +5,7 @@
 const options = { // defaults
   lButton: false, mButton: false, rButton: true,
   shiftKey: false, ctrlKey: false, altKey: false, metaKey: false,
-  sensitivity: 9, speed: 28000, friction: 5,
+  threshold: 9, speed: 28000, friction: 5,
   notext: false,
   debug: false,
   disabledUrls: [],
@@ -15,7 +15,7 @@ const setComputedOptions = () =>
   Object.assign(cOptions, { buttons: (options.lButton ? 1 : 0) +
                                      (options.rButton ? 2 : 0) +
                                      (options.mButton ? 4 : 0),
-                            sensitivity2: Math.pow(options.sensitivity, 2) });
+                            threshold2: options.threshold ** 2 });
 setComputedOptions();
 const KEYS = Object.keys(options).filter(x => x.endsWith("Key"));
 const BOOLEAN_OPTS =
@@ -380,7 +380,7 @@ const onMouseMove = ev => {
   //
   case CLICK:
     if (ev.buttons != cOptions.buttons) break;
-    if (vmag2(vsub(mouseOrigin, evPos(ev))) > cOptions.sensitivity2) {
+    if (vmag2(vsub(mouseOrigin, evPos(ev))) > cOptions.threshold2) {
       CoverDiv.show();
       Drag.start(ev);
     }
